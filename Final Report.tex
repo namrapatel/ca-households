@@ -22,8 +22,8 @@
     \end{tabular}
     
     \vfill
-    {\large \textbf{Word Count: 2337}}\\[1.5cm]    
-    {\large April 2025}
+    {\large \textbf{Word Count: 2338}}\\[1.5cm]    
+    {\large April 20th, 2025}
 \end{titlepage}
 
 
@@ -49,7 +49,7 @@ Cluster interpretation yielded:
     \item \textbf{Cluster 2:} Native-born, mid-spending, non-traditional households.
 \end{itemize}
 
-UMAP was applied for further visualization using tuned hyperparameters. Euclidean distance with \texttt{n\_neighbors=40} and \texttt{min\_dist=1} showed best separation. UMAP produced clearer cluster boundaries than PCA, particularly highlighting differences in household composition and immigrant status.
+UMAP was applied for further visualization using tuned hyperparameters. Manhattan distance with \texttt{n\_neighbors=40} and \texttt{min\_dist=1} showed best separation. UMAP produced clearer cluster boundaries than PCA, particularly highlighting differences in household composition and immigrant status.
 
 \subsection*{2. Regression Modeling for Insurance \& Pension Spending}
 
@@ -211,7 +211,7 @@ These labels will be used in subsequent visualizations and interpretation.
 
 To further investigate latent structure, we applied UMAP to reduce the high-dimensional data to two dimensions for visualization. UMAP is a non-linear technique well-suited for preserving both local and global structure in complex datasets.
 
-We conducted a grid search over key hyperparameters: \texttt{n\_neighbors}, \texttt{min\_dist}, and \texttt{spread}, using a low \texttt{n\_epochs} of 100 for faster iteration. Three distance metrics (Euclidean, Manhattan, Cosine) were compared. Across all metrics and settings (Figures~\ref{fig:umap}, \ref{fig:umap1}, \ref{fig:umap2}), Euclidean consistently yielded the most interpretable clusters.
+We conducted a grid search over key hyperparameters: \texttt{n\_neighbors}, \texttt{min\_dist}, and \texttt{spread}, using a low \texttt{n\_epochs} of 100 for faster iteration. Three distance metrics (Euclidean, Manhattan, Cosine) were compared. Across all metrics and settings (Figures~\ref{fig:umap}, \ref{fig:umap1}, \ref{fig:umap2}), Manhattan consistently yielded the most interpretable clusters.
 
 The best configuration was found to be \texttt{n\_neighbors=40}, \texttt{min\_dist=1}, and \texttt{spread=1.5} using the Manhattan distance metric. This setup produced compact, well-separated clusters while maintaining a balance between local cohesion and global structure.
 
