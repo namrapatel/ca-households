@@ -11,7 +11,7 @@
     {\LARGE \textbf{DS 3000: Introduction to Machine Learning}}\\[0.5cm]
     {\Large \textbf{Canadian Households Coursework}}\\[1.5cm]
     
-    {\Huge \textbf{Analysis of Canadian Household Demographics\\ and Spending Patterns}}\\[2cm]
+    {\Huge \textbf{Analysis of Canadian Household Demographics \\[0.3cm] and Spending Patterns}}\\[2cm]
 
     {\large \textbf{Group 9}}\\[0.8cm]
     \begin{tabular}{rl}
@@ -103,24 +103,27 @@ Silhouette plots for $k=2$, $k=3$, and $k=4$ (Figures~\ref{fig:silhouette_k2}–
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{figures/silhouette_k2.png}
-    \caption{Silhouette Plot for $k=2$}
-    \label{fig:silhouette_k2}
+    \begin{minipage}{0.50\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/silhouette_k2.png}
+        \caption{Silhouette Plot for $k=2$}
+        \label{fig:silhouette_k2}
+    \end{minipage}\hfill
+    \begin{minipage}{0.50\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/silhouette_k3.png}
+        \caption{Silhouette Plot for $k=3$}
+        \label{fig:silhouette_k3}
+    \end{minipage}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{figures/silhouette_k3.png}
-    \caption{Silhouette Plot for $k=3$}
-    \label{fig:silhouette_k3}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\textwidth]{figures/silhouette_k4.png}
+    \includegraphics[width=0.50\textwidth]{figures/silhouette_k4.png}
     \caption{Silhouette Plot for $k=4$}
     \label{fig:silhouette_k4}
 \end{figure}
+
 
 The Silhouette plot for $k=5$ (Figure~\ref{fig:silhouette_k5}) and average Silhouette scores across $k=2$ to $k=5$ (Figure~\ref{fig:silhouette_scores}) are included in the appendix.
 
@@ -210,14 +213,14 @@ To further investigate latent structure, we applied UMAP to reduce the high-dime
 
 We conducted a grid search over key hyperparameters: \texttt{n\_neighbors}, \texttt{min\_dist}, and \texttt{spread}, using a low \texttt{n\_epochs} of 100 for faster iteration. Three distance metrics (Euclidean, Manhattan, Cosine) were compared. Across all metrics and settings (Figures~\ref{fig:umap}, \ref{fig:umap1}, \ref{fig:umap2}), Euclidean consistently yielded the most interpretable clusters.
 
-The best configuration was found to be \texttt{n\_neighbors=40}, \texttt{min\_dist=1}, and \texttt{spread=1.5} using the Euclidean metric. This setup produced compact, well-separated clusters while maintaining a balance between local cohesion and global structure.
+The best configuration was found to be \texttt{n\_neighbors=40}, \texttt{min\_dist=1}, and \texttt{spread=1.5} using the Manhattan distance metric. This setup produced compact, well-separated clusters while maintaining a balance between local cohesion and global structure.
 
 We then re-ran UMAP with this configuration and increased \texttt{n\_epochs} to 1000 for improved convergence. The final embedding (Figure~\ref{fig:umap_final}) revealed sharper boundaries between clusters and uncovered two additional tightly packed groups not visible in PCA. These distinct clusters suggest UMAP was able to capture non-linear structures missed by PCA, reinforcing its value for exploratory analysis.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{figures/output3.png}
-    \caption{UMAP with Euclidean distance, $n\_neighbors=40$, $min\_dist=1$, $spread=1.5$, and 1000 epochs.}
+    \caption{UMAP with Manhattan distance, \texttt{n\_neighbors=40}, \texttt{min\_dist=1}, \texttt{spread=1.5}, and 1000 epochs.}
     \label{fig:umap_final}
 \end{figure}
 
@@ -347,6 +350,10 @@ We predicted insurance and pension spending accurately with both methods. Elasti
 
 \appendix
 \section*{Appendix}
+
+\section{Experiment Notebooks}
+The Jupyter Notebooks in which our experiments and analysis were conducted are provided alongside this report. The work related to Clustering and Principal Component Analysis can be found in \texttt{Clustering\_and\_PCA.ipynb}. UMAP related works are provided in \texttt{UMAP.ipynb}, and all regression related work is in \texttt{Part\_2.ipynb}.
+
 \section{Extra Silhouette Plots}
 
 \begin{figure}[H]
