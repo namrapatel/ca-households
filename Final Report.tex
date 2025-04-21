@@ -6,38 +6,31 @@
 
 \begin{titlepage}
     \centering
-    \vspace*{2cm}
+    \vspace*{2.5cm}
     
-    \Huge
-    \textbf{Analysis of Canadian Household Demographics and Spending Patterns}\\[1.5cm]
+    {\LARGE \textbf{DS 3000: Introduction to Machine Learning}}\\[0.5cm]
+    {\Large \textbf{Canadian Households Coursework}}\\[1.5cm]
     
-    \Large
-    \textbf{DS 3000: Introduction to Machine Learning}\\[0.5cm]
-    \textbf{Assignment: Canadian Households Coursework}\\[0.5cm]
-    
-    \vspace{1.5cm}
-    \Large
-    \textbf{Group Members:}\\[0.5cm]
-    \normalsize
-    Namra Patel \hfill npate334 \\[0.2cm]
-    Moksh Trehan \hfill mtrehan2\\[0.2cm]
-    Daehan Lee \hfill dlee739 \\[0.2cm]
-    Student Name 4 \hfill Student ID 4\\[1.5cm]
-    
-    \Large
-    \textbf{Word Count:} XXXX\\[2cm] 
+    {\Huge \textbf{Analysis of Canadian Household Demographics\\ and Spending Patterns}}\\[2cm]
+
+    {\large \textbf{Group 9}}\\[0.8cm]
+    \begin{tabular}{rl}
+        Namra Patel & \hspace{1cm} npate334 \\
+        Moksh Trehan & \hspace{1cm} mtrehan2 \\
+        Daehan Lee & \hspace{1cm} dlee739 \\
+        Sepehr Seghatoleslami & \hspace{1cm} sseghato \\
+    \end{tabular}
     
     \vfill
-    \Large
-    \textbf{April 2025}
-    
+    {\large \textbf{Word Count: 2337}}\\[1.5cm]    
+    {\large April 2025}
 \end{titlepage}
 
 
 \tableofcontents
 \newpage	
 
-\section*{Executive Summary}
+\section{Executive Summary}
 
 This project analyzes Canadian household data to identify patterns in demographic and economic behavior using clustering and dimensionality reduction, followed by predictive modeling of insurance and pension spending.
 
@@ -81,7 +74,7 @@ SHAP analysis on the XGBoost model confirmed the importance of variables such as
 \section{Clustering and Dimensionality Reduction}
 In this section we outline the process and results of applying the K-Means Clustering algorithm, and the Principal Component Analysis (PCA) and the Uniform Manifold Approximation and Projection (UMAP) dimensionality reduction techniques to learn if there are segments or axes of grouping in our data that allow us to uncover meaningful patterns or characteristics and guide subsequent predictive modeling.
 
-\subsubsection{Data Preprocessing}
+\subsection{Data Preprocessing}
 
 To prepare the data for clustering and dimensionality reduction, we first merged the DemoStats and HouseholdSpend datasets using Dissemination Area (DA) identifiers, then dropped the identifier columns as they offered no predictive value.
 
@@ -93,7 +86,7 @@ Given the skewed nature of our dataset, we handled outliers using IQR-based wins
 
 Finally, we applied z-score normalization to all numeric features. As K-Means and PCA are scale-sensitive, standardization ensures fair comparison across features.
 
-\subsubsection{K-Means Clustering}
+\subsection{K-Means Clustering}
 
 Due to the dataset’s size, we applied the Elbow and Silhouette methods on a 10\% sample to estimate an appropriate number of clusters for K-Means while minimizing compute overhead.
 
@@ -134,7 +127,7 @@ The Silhouette plot for $k=5$ (Figure~\ref{fig:silhouette_k5}) and average Silho
 Given the interpretability and moderate separation at $k=3$, we selected it as the final number of clusters. These labels were retained for dimensionality reduction and further analysis.
 
 
-\subsubsection{Principal Component Analysis}
+\subsection{Principal Component Analysis}
 
 To explore latent structure in the data, we applied Principal Component Analysis (PCA), a linear dimensionality reduction technique. We compared results on both unscaled and standardized data. Although PCA on unscaled data yielded a first component that explains 98.8\% of the variance, this result was driven largely by the presence of features with larger numeric scales. In contrast, the scaled version, where all variables are z-score normalized, produced a more balanced set of principal components, with the first three PCs explaining 67.9\%, 3.7\%, and 3.0\% of the variance, respectively. Therefore, all PCA analyses moving forward are based on the scaled data.
 
@@ -142,7 +135,7 @@ Figure~\ref{fig:pca3d} illustrates 3D scatterplots of the first three principal 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{figures/pca3d_scaled_vs_unscaled.png}
+    \includegraphics[width=0.8\textwidth]{figures/pca3d_scaled_vs_unscaled.png}
     \caption{3D PCA Scatter Plots Comparing Unscaled (Left) vs. Scaled (Right) Data}
     \label{fig:pca3d}
 \end{figure}
@@ -154,7 +147,7 @@ PC1 appears to capture a dimension tied to household economic activity and consu
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{figures/pc1_contribs.png}
+    \includegraphics[width=0.8\textwidth]{figures/pc1_contribs.png}
     \caption{Top Contributing Categories to PC1}
     \label{fig:pc1}
 \end{figure}
@@ -164,7 +157,7 @@ PC2 differentiates areas with high immigrant presence from those with more estab
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{figures/pc2_contribs.png}
+    \includegraphics[width=0.75\textwidth]{figures/pc2_contribs.png}
     \caption{Top Contributing Categories to PC2}
     \label{fig:pc2}
 \end{figure}
@@ -174,7 +167,7 @@ PC3 seems to reflect differences in household structure and housing type (Figure
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{figures/pc3_contribs.png}
+    \includegraphics[width=0.76\textwidth]{figures/pc3_contribs.png}
     \caption{Top Contributing Categories to PC3}
     \label{fig:pc3}
 \end{figure}
@@ -203,7 +196,7 @@ To better understand the characteristics of the clusters formed by K-Means ($k=3
 \textbf{Cluster 0: Affluent, Traditional Immigrant Families.}  
 This cluster scores highest on PC1, indicating strong consumer activity and dense, demographically diverse households. The slightly negative PC2 score suggests a moderate immigrant presence, while a mildly positive PC3 implies more traditional household structures. These could be higher-income, family-oriented areas with a mix of native and immigrant populations.
 
-\textbf{Cluster 1: Low-Spending, High-Immigration Small Households.}  
+\textbf{Cluster 1: Low-Spending, High-Immigration, Small Households.}  
 Cluster 1 shows the lowest PC1 score, reflecting low household spending and smaller population centers. A modestly negative PC2 indicates relatively recent immigrant populations, and the near-zero PC3 score hints at non-traditional or smaller households. These may represent younger, immigrant-dominated areas with limited consumer capacity and less conventional living arrangements.
 
 \textbf{Cluster 2: Mid-Spending, Native, Non-Traditional Households.}  
@@ -211,10 +204,25 @@ This group is moderate on PC1 (spending) and somewhat positive on PC2, suggestin
 
 These labels will be used in subsequent visualizations and interpretation.
 
-\subsubsection{Uniform Manifold Approximation and Projection}
+\subsection{Uniform Manifold Approximation and Projection}
+
+To further investigate latent structure, we applied UMAP to reduce the high-dimensional data to two dimensions for visualization. UMAP is a non-linear technique well-suited for preserving both local and global structure in complex datasets.
+
+We conducted a grid search over key hyperparameters: \texttt{n\_neighbors}, \texttt{min\_dist}, and \texttt{spread}, using a low \texttt{n\_epochs} of 100 for faster iteration. Three distance metrics (Euclidean, Manhattan, Cosine) were compared. Across all metrics and settings (Figures~\ref{fig:umap}, \ref{fig:umap1}, \ref{fig:umap2}), Euclidean consistently yielded the most interpretable clusters.
+
+The best configuration was found to be \texttt{n\_neighbors=40}, \texttt{min\_dist=1}, and \texttt{spread=1.5} using the Euclidean metric. This setup produced compact, well-separated clusters while maintaining a balance between local cohesion and global structure.
+
+We then re-ran UMAP with this configuration and increased \texttt{n\_epochs} to 1000 for improved convergence. The final embedding (Figure~\ref{fig:umap_final}) revealed sharper boundaries between clusters and uncovered two additional tightly packed groups not visible in PCA. These distinct clusters suggest UMAP was able to capture non-linear structures missed by PCA, reinforcing its value for exploratory analysis.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/output3.png}
+    \caption{UMAP with Euclidean distance, $n\_neighbors=40$, $min\_dist=1$, $spread=1.5$, and 1000 epochs.}
+    \label{fig:umap_final}
+\end{figure}
+
 
 \section{Regression}
-
 \subsection*{Target Definition \& Feature Engineering}
 We define the target variable as the proportion of household income spent on personal insurance premiums and retirement/pension contributions. Concretely, if $I$ denotes total insurance spending, $P$ denotes pension contributions, and $H$ denotes household income, then
 \[
@@ -228,7 +236,7 @@ To prepare the data, we:
   \item Applied IQR-based winsorization to continuous predictors only, capping values at the 1.5\(\times\)IQR bounds to mitigate the influence of extreme outliers.
 \end{itemize}
 
-We retained zero–contribution cases to capture non‑working households. Using correlation heatmaps, we created interaction terms (e.g., household size × insurance spending). Continuous features were winsorized at 1.5×IQR and standardized, and multi-level categoricals were one‑hot encoded. This pipeline prepared the data for both linear and non‑linear models.
+We retained zero–contribution cases to capture non-working households. Using correlation heatmaps, we created interaction terms (e.g., household size × insurance spending). Continuous features were winsorized at 1.5×IQR and standardized, and multi-level categoricals were one-hot encoded. This pipeline prepared the data for both linear and non-linear models.
 
 \subsection{Elastic Net Regression}
 An \texttt{ElasticNetCV} model was fit using a grid over regularization strength $\alpha \in\{0.01,0.05,0.1\}$ and mixing parameter $\ell_1$ ratio $\in\{0.1,0.3,0.5\}$, with three-fold CV and up to 10{,}000 iterations for convergence. On the test set, the model achieved
@@ -287,7 +295,7 @@ Test performance improved substantially:
 We used early stopping (50 rounds) to prevent overfitting. Feature importance (gain and cover) matched SHAP rankings. Partial dependence plots for \texttt{HSHO002} and \texttt{ECYMTNMED} showed non-linear threshold effects. Sensitivity tests confirmed that \texttt{max\_depth}=5 balanced interaction capture and variance. These findings highlight XGBoost’s ability to model complex patterns beyond linear methods.
 
 \subsection{SHAP-Based Interpretation}
-We computed SHAP values on the test set to quantify feature contributions. Table~\ref{tab:shap_top5} shows the top five features by mean |SHAP|, and Figure~\ref{fig:shap_hsho002} displays the dependence plot for \texttt{HSHO002}.
+We computed SHAP values on the test set to quantify feature contributions. Table~\ref{tab:shap_top5} shows the top five features by mean $\left|\text{SHAP}\right|$, and Figure~\ref{fig:shap_hsho002} displays the dependence plot for \texttt{HSHO002}.
 
 \begin{table}[ht]
   \centering
@@ -318,7 +326,7 @@ For each of the top five features, key SHAP-based behaviors include:
   \item \textbf{HSHO002}: Values below approximately two housekeepers drive strong positive contributions, while higher counts reverse to negative impacts, indicating threshold-like effects (Fig.~\ref{fig:shap_hsho002}).
   \item \textbf{HSSH042}: Negative contributions intensify for large secondary mortgage values, consistent with heightened budget constraints under elevated debt loads.
   \item \textbf{HSMG001S}: Small to moderate gift and contribution amounts yield positive effects, but marginal impact diminishes at higher values, suggesting diminishing returns.
-  \item \textbf{ECYMTNMED}: Consistently negative impact on predicted spending, with a sharper decline at extreme ages, highlighting accelerated non‑linear aging effects.
+  \item \textbf{ECYMTNMED}: Consistently negative impact on predicted spending, with a sharper decline at extreme ages, highlighting accelerated non-linear aging effects.
   \item \textbf{HSCC002}: Low levels of childcare outside the home contribute positively and steeply, then plateau, reflecting interplay with total household support expenditures.
 \end{itemize}
 
@@ -329,12 +337,12 @@ We used SHAP interaction values to detect pairwise effects, notably between \tex
 We predicted insurance and pension spending accurately with both methods. Elastic Net ($R^2=0.8040$) highlighted key macroeconomic and demographic drivers. XGBoost ($R^2\approx0.9114$) captured non-linear, threshold effects (e.g.\ housekeeper counts, gift contributions) that Elastic Net missed. SHAP confirmed these non-linear patterns and provided actionable global and local insights.
 
 \begin{itemize}
-  \item \textbf{Deploy the XGBoost model in production}, with routine monitoring of predictive performance and recalibration every quarter. Leverage early‑stopping and validation‑based retraining to guard against concept drift.
-  \item \textbf{Integrate SHAP‑driven alerts} into decision workflows. For example, flag households with extreme SHAP values on \texttt{HSHO002} or \texttt{HSMG001S} to target outreach or adjust product offerings.
-  \item \textbf{Segment the customer base} by key drivers uncovered (e.g.\ median maintainer age, household support expenditures). Tailor marketing and education campaigns—for younger households, emphasize pension benefits; for high secondary‑mortgage clients, highlight insurance products that mitigate debt risk.
+  \item \textbf{Deploy the XGBoost model in production}, with routine monitoring of predictive performance and recalibration every quarter. Leverage early-stopping and validation-based retraining to guard against concept drift.
+  \item \textbf{Integrate SHAP-driven alerts} into decision workflows. For example, flag households with extreme SHAP values on \texttt{HSHO002} or \texttt{HSMG001S} to target outreach or adjust product offerings.
+  \item \textbf{Segment the customer base} by key drivers uncovered (e.g.\ median maintainer age, household support expenditures). Tailor marketing and education campaigns—for younger households, emphasize pension benefits; for high secondary-mortgage clients, highlight insurance products that mitigate debt risk.
   \item \textbf{Expand data coverage} to include behavioral and psychographic variables (e.g.\ online engagement, risk tolerance surveys) to refine model granularity and support personalized recommendations.
-  \item \textbf{Establish a governance framework} for model explainability and fairness. Regularly audit feature importances and SHAP interactions to ensure no adverse or biased effects on underserved groups (e.g.\ unemployed or non‑working‑age segments).
-  \item \textbf{Conduct A/B tests} to quantify the lift from model‑driven interventions versus standard strategies, using metrics such as contribution rate uplift and retention.
+  \item \textbf{Establish a governance framework} for model explainability and fairness. Regularly audit feature importances and SHAP interactions to ensure no adverse or biased effects on underserved groups (e.g.\ unemployed or non-working-age segments).
+  \item \textbf{Conduct A/B tests} to quantify the lift from model-driven interventions versus standard strategies, using metrics such as contribution rate uplift and retention.
 \end{itemize}
 
 \appendix
@@ -460,6 +468,55 @@ ECYHOMFREN & - & - & Language Spoken Most Often At Home & -0.12314 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\section{Varying UMAP Distance Metric Plots}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/output.png}
+    \caption{UMAP with euclidean distance metric and different values of n\_neighbors, min\_dist and spread.}
+    \label{fig:umap}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/output1.png}
+    \caption{UMAP with cosine distance metric and different values of n\_neighbors, min\_dist and spread.}
+    \label{fig:umap1}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/output2.png}
+    \caption{UMAP with manhattan distance metric and different values of n\_neighbors, min\_dist and spread.}
+    \label{fig:umap2}
+\end{figure}
+
+\section{SHAP Plots for Additional Variables}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\linewidth]{figures/ECYMTNMED_SHAP.png}
+    \caption{SHAP for ECYMTNMED}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\linewidth]{figures/HSCC002_SHAP.png}
+    \caption{SHAP for HSCC002}
+  \end{subfigure}
+
+  \vspace{0.5cm}
+
+  \begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\linewidth]{figures/HSMG001S_SHAP.png}
+    \caption{SHAP for HSMG001S}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\linewidth]{figures/HSSH042_SHAP.png}
+    \caption{SHAP for HSSH042}
+  \end{subfigure}
+  
+  \caption{SHAP Value Graphs for Additional Variables}
+\end{figure}
 
 
 \end{document}
