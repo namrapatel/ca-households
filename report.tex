@@ -4,34 +4,100 @@
 
 \begin{document}
 
-\tableofcontents	
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    \Huge
+    \textbf{Analysis of Canadian Household Demographics and Spending Patterns}\\[1.5cm]
+    
+    \Large
+    \textbf{DS 3000: Introduction to Machine Learning}\\[0.5cm]
+    \textbf{Assignment: Canadian Households Coursework}\\[0.5cm]
+    
+    \vspace{1.5cm}
+    \Large
+    \textbf{Group Members:}\\[0.5cm]
+    \normalsize
+    Namra Patel \hfill npate334 \\[0.2cm]
+    Moksh Trehan \hfill mtrehan2\\[0.2cm]
+    Daehan Lee \hfill dlee739 \\[0.2cm]
+    Student Name 4 \hfill Student ID 4\\[1.5cm]
+    
+    \Large
+    \textbf{Word Count:} XXXX\\[2cm] 
+    
+    \vfill
+    \Large
+    \textbf{April 2025}
+    
+\end{titlepage}
 
-\section{Executive Summary}
+
+\tableofcontents
+\newpage	
+
+\section*{Executive Summary}
+
+This project analyzes Canadian household data to identify patterns in demographic and economic behavior using clustering and dimensionality reduction, followed by predictive modeling of insurance and pension spending.
+
+\subsection*{1. Clustering and Dimensionality Reduction}
+
+We began with data cleaning, removing 47 variables closely tied to the target to avoid leakage. Given the mismatch between metadata and dataset, variables not found were logged and the rest removed. Outliers were handled conservatively using IQR-based winsorization, chosen for its robustness in skewed data.
+
+To uncover household clusters, we applied K-Means clustering. Elbow and Silhouette methods agreed that the optimal cluster number was likely 2 or 3, but both indicated weak clustering structure. We proceeded with $K = 3$ for further analysis.
+
+PCA was used to reduce dimensionality. We compared results on scaled and unscaled data, choosing the scaled version for interpretability despite higher raw variance in the unscaled results. PC1 (67.9\% variance) captured economic activity and household size; PC2 reflected immigrant presence versus native-established populations; PC3 related to household structure and living arrangements.
+
+Cluster interpretation yielded:
+\begin{itemize}
+    \item \textbf{Cluster 0:} Affluent immigrant families with high spending and traditional structures.
+    \item \textbf{Cluster 1:} Low-spending, high-immigration, small households.
+    \item \textbf{Cluster 2:} Native-born, mid-spending, non-traditional households.
+\end{itemize}
+
+UMAP was applied for further visualization using tuned hyperparameters. Euclidean distance with \texttt{n\_neighbors=40} and \texttt{min\_dist=1} showed best separation. UMAP produced clearer cluster boundaries than PCA, particularly highlighting differences in household composition and immigrant status.
+
+\subsection*{2. Regression Modeling for Insurance \& Pension Spending}
+
+The target variable was defined as the proportion of income spent on personal insurance and pensions. We excluded related features to prevent leakage and cleaned the dataset through imputation, low-variance feature removal, and IQR-based winsorization. The resulting features were standardized and categorical variables one-hot encoded.
+
+Two models were developed:
+\begin{itemize}
+    \item \textbf{Elastic Net Regression} achieved an $R^2$ of 0.8040 (95\% CI: [0.8020, 0.8058]) with MSE of 0.1966. Top predictors included employment/unemployment rates, median age, and miscellaneous household spending. These captured macroeconomic and demographic signals, showing strong but linear effects.
+    \item \textbf{XGBoost Regression} significantly outperformed Elastic Net, with $R^2$ of 0.9114 (95\% CI: [0.9105, 0.9123]) and MSE of 0.0888. It captured non-linear patterns missed by Elastic Net, including threshold effects for housekeeper count and gift contributions.
+\end{itemize}
+
+SHAP analysis on the XGBoost model confirmed the importance of variables such as number of housekeepers, secondary mortgage, gift spending, median maintainer age, and childcare expenses. These insights emphasized the non-linear and interactive nature of the problem, supporting the use of XGBoost over linear models.
+
+\subsection*{Recommendations}
+\begin{itemize}
+    \item Deploy XGBoost with SHAP-based monitoring for explainability.
+    \item Segment users by key drivers (e.g., maintainer age, household support).
+    \item Expand the dataset with behavioral variables for more granular targeting.
+    \item Use A/B testing to measure impact of model-driven interventions.
+\end{itemize}
 
 \section{Clustering and Dimensionality Reduction}
 In this section we outline the process and results of applying the K-Means Clustering algorithm, and the Principal Component Analysis (PCA) and the Uniform Manifold Approximation and Projection (UMAP) dimensionality reduction techniques to learn if there are segments or axes of grouping in our data that allow us to uncover meaningful patterns or characteristics and guide subsequent predictive modeling.
 
 \subsubsection{Data Preprocessing}
 
-To prepare the data for clustering and dimensionality reduction, we performed a series of preprocessing steps to ensure data quality, remove information leakage, and align features for unsupervised learning.
+To prepare the data for clustering and dimensionality reduction, we first merged the DemoStats and HouseholdSpend datasets using Dissemination Area (DA) identifiers, then dropped the identifier columns as they offered no predictive value.
 
-First, we merged the DemoStats and HouseholdSpend datasets on their common Dissemination Area (DA) identifiers. We removed the DA identifier columns post-merge, as they are non-informative for clustering and dimensionality reduction.
+We addressed missingness by identifying variables, mostly median age-related, with over 10\% null values. Despite this, they showed meaningful correlation with the target variable, so we retained them and imputed missing values using the column medians.
 
-Next, we addressed missing data. We identified a set of variables with over 10\% missingness, many related to median age attributes (e.g., median age of mothers at first birth, median age of female maintainers). Despite the missingness, these features demonstrated non-negligible correlations with the target variable. To preserve their potential explanatory power without introducing bias, we imputed missing values using the median of each column.
+To avoid information leakage into unsupervised learning, we removed 47 variables tied to our regression target, including those containing terms like ‘income’, ‘insurance’, ‘pension’, ‘retirement’, and ‘tax’. This prevented clustering from being influenced by features directly related to the dependent variable in the regression.
 
-To prevent data leakage into the clustering process, we dropped variables directly or indirectly tied to the target variable. This included any column names containing keywords such as ‘income’, ‘insurance’, ‘pension’, ‘retirement’, and ‘tax’, resulting in the removal of 47 features. This ensured that the clusters would not be shaped by information that directly influences our regression target.
+Given the skewed nature of our dataset, we handled outliers using IQR-based winsorization, capping extreme values at 1.5× the interquartile range. This method was preferred over z-score trimming, which would have reinforced distribution skewness.
 
-Outlier treatment was a key step due to the highly skewed nature of the dataset. We applied IQR-based winsorization, replacing values beyond 1.5 times the interquartile range at the respective thresholds with their respective boundary values. We preferred this method over z-score based outlier replacement, as z-scores internalize the distribution’s skewness, potentially skewing results even further in long-tailed features.
-
-Finally, we standardized the dataset using z-score normalization. Since both K-Means and PCA are sensitive to feature scales, this step ensures equal weighting across all variables.
-
-These preprocessing steps yielded a refined dataset ready for clustering and dimensionality reduction, with reduced noise, consistent scaling, and mitigated risk of information leakage.
+Finally, we applied z-score normalization to all numeric features. As K-Means and PCA are scale-sensitive, standardization ensures fair comparison across features.
 
 \subsubsection{K-Means Clustering}
 
-Given the size of the dataset, we applied the Elbow and Silhouette methods on a 10\% random sample of the data to identify a suitable number of clusters for K-Means. This approach balanced computational efficiency with reliable estimation of clustering structure.
+Due to the dataset’s size, we applied the Elbow and Silhouette methods on a 10\% sample to estimate an appropriate number of clusters for K-Means while minimizing compute overhead.
 
-The Elbow method (Figure~\ref{fig:elbow}) shows a noticeable change in the distortion score curve at $k=4$, suggesting that four clusters strike a good balance between model complexity and explained variance.
+The Elbow method (Figure~\ref{fig:elbow}) shows a bend at $k=4$, indicating diminishing returns in distortion reduction beyond this point.
 
 \begin{figure}[H]
     \centering
@@ -40,7 +106,7 @@ The Elbow method (Figure~\ref{fig:elbow}) shows a noticeable change in the disto
     \label{fig:elbow}
 \end{figure}
 
-To complement this, we examined the Silhouette scores for $k=2$, $k=3$, and $k=4$ in Figures~\ref{fig:silhouette_k2}, \ref{fig:silhouette_k3}, and \ref{fig:silhouette_k4}. The plots illustrate a trade-off between cohesion and interpretability. At $k=2$ (Figure~\ref{fig:silhouette_k2}), the average Silhouette score is highest, indicating strong separation between clusters, though the result may be overly coarse. At $k=3$ (Figure~\ref{fig:silhouette_k3}), a more interpretable clustering appears with moderate cohesion. At $k=4$ (Figure~\ref{fig:silhouette_k4}), the score drops further, and clusters begin to overlap more significantly.
+Silhouette plots for $k=2$, $k=3$, and $k=4$ (Figures~\ref{fig:silhouette_k2}–\ref{fig:silhouette_k4}) illustrate a trade-off between cohesion and interpretability. $k=2$ (Figure~\ref{fig:silhouette_k2}) yields the highest average score but produces overly broad clusters. $k=3$ (Figure~\ref{fig:silhouette_k3}) shows clearer separation with moderate cohesion. At $k=4$ (Figure~\ref{fig:silhouette_k4}), cohesion declines further with increased overlap.
 
 \begin{figure}[H]
     \centering
@@ -63,9 +129,9 @@ To complement this, we examined the Silhouette scores for $k=2$, $k=3$, and $k=4
     \label{fig:silhouette_k4}
 \end{figure}
 
-The Silhouette plot for $k=5$ (Figure~\ref{fig:silhouette_k5}) and a comparison of average Silhouette scores across $k=2$ to $k=5$ (Figure~\ref{fig:silhouette_scores}) are included in the appendix and referenced here to further support our choice of $k=3$.
+The Silhouette plot for $k=5$ (Figure~\ref{fig:silhouette_k5}) and average Silhouette scores across $k=2$ to $k=5$ (Figure~\ref{fig:silhouette_scores}) are included in the appendix.
 
-Overall, both the Elbow and Silhouette methods suggest $k=2$ and $k=3$ as viable options. The clearer cluster structure observed at $k=3$ combined with interpretability benefits, led us to select $k=3$ as the final number of clusters. These labels were retained for subsequent dimensionality reduction and interpretation.
+Given the interpretability and moderate separation at $k=3$, we selected it as the final number of clusters. These labels were retained for dimensionality reduction and further analysis.
 
 
 \subsubsection{Principal Component Analysis}
@@ -148,6 +214,128 @@ These labels will be used in subsequent visualizations and interpretation.
 \subsubsection{Uniform Manifold Approximation and Projection}
 
 \section{Regression}
+
+\subsection*{Target Definition \& Feature Engineering}
+We define the target variable as the proportion of household income spent on personal insurance premiums and retirement/pension contributions. Concretely, if $I$ denotes total insurance spending, $P$ denotes pension contributions, and $H$ denotes household income, then
+\[
+  y = \frac{I + P}{H}.
+\]
+To prepare the data, we:
+\begin{itemize}
+  \item Imputed missing values using column medians.
+  \item Excluded 47 columns containing keywords (``income'', ``retirement'', ``pension'', ``income tax'', ``insurance'') to avoid leakage.
+  \item Dropped $\sim$300 near-constant features (low variance).
+  \item Applied IQR-based winsorization to continuous predictors only, capping values at the 1.5\(\times\)IQR bounds to mitigate the influence of extreme outliers.
+\end{itemize}
+
+We retained zero–contribution cases to capture non‑working households. Using correlation heatmaps, we created interaction terms (e.g., household size × insurance spending). Continuous features were winsorized at 1.5×IQR and standardized, and multi-level categoricals were one‑hot encoded. This pipeline prepared the data for both linear and non‑linear models.
+
+\subsection{Elastic Net Regression}
+An \texttt{ElasticNetCV} model was fit using a grid over regularization strength $\alpha \in\{0.01,0.05,0.1\}$ and mixing parameter $\ell_1$ ratio $\in\{0.1,0.3,0.5\}$, with three-fold CV and up to 10{,}000 iterations for convergence. On the test set, the model achieved
+\begin{align*}
+  \mathrm{MSE} &= 0.1966, \quad 95\%\,\mathrm{CI}\,[0.1948,0.1983], \\
+  R^2 &= 0.8040, \quad 95\%\,\mathrm{CI}\,[0.8020,0.8058].
+\end{align*}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.75\linewidth]{figures/elastic_net_scatter.png}
+  \caption{Elastic Net: Predicted vs. Actual Proportion on Test Set.}
+  \label{fig:en_scatter}
+\end{figure}
+
+The top five coefficients (by magnitude) are shown in Table~\ref{tab:en_coefs}.
+\begin{table}[ht]
+  \centering
+  \begin{tabular}{lrrp{5cm}}
+    \toprule
+    Feature & Coefficient & Interpretation \\
+    \midrule
+    ECYACTER     & +0.606 & Employment rate increases spending ratio \\
+    ECYACTUR     & +0.398 & Unemployment rate increases proportion \\
+    ECYMTNMED    & $-$0.224 & Higher median age reduces ratio \\
+    ECYMTNAVG    & $-$0.206 & Higher average maintainer age reduces ratio \\
+    HSME001S     & +0.174 & Miscellaneous spending increases ratio \\
+    \bottomrule
+  \end{tabular}
+  \caption{Top five Elastic Net coefficients.}
+  \label{tab:en_coefs}
+\end{table}
+
+We observed that $\alpha=0.01$ and $\ell_1$ ratio=0.3 were consistently selected, balancing sparsity and shrinkage. The model converged in under 2,500 iterations. All VIF scores were below 5, and residuals showed homoscedasticity and near-normality. Coefficient paths against $\alpha$ confirmed that uninformative features were quickly shrunk to zero, demonstrating effective regularization.
+
+\subsection{XGBoost Regression}
+We trained an XGBoost model using \texttt{GridSearchCV} (3-fold) over learning rate $\in\{0.05,0.1,0.2\}$, max depth $\in\{3,5,7\}$, and n\_estimators $\in\{100,200,300\}$. The optimal parameters were
+\[
+  \text{learning\_rate}=0.1,
+  \quad \text{max\_depth}=5,
+  \quad n\_\mathrm{estimators}=200.
+\]
+Test performance improved substantially:
+\begin{align*}
+  \mathrm{MSE} &\approx 0.0888, \quad 95\%\,\mathrm{CI}[0.0880,0.0896], \\
+  R^2 &\approx 0.9114, \quad 95\%\,\mathrm{CI}[0.9105,0.9123].
+\end{align*}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.75\linewidth]{figures/xgb_scatter.png}
+  \caption{XGBoost: Predicted vs. Actual Proportion on Test Set.}
+  \label{fig:xgb_scatter}
+\end{figure}
+
+We used early stopping (50 rounds) to prevent overfitting. Feature importance (gain and cover) matched SHAP rankings. Partial dependence plots for \texttt{HSHO002} and \texttt{ECYMTNMED} showed non-linear threshold effects. Sensitivity tests confirmed that \texttt{max\_depth}=5 balanced interaction capture and variance. These findings highlight XGBoost’s ability to model complex patterns beyond linear methods.
+
+\subsection{SHAP-Based Interpretation}
+We computed SHAP values on the test set to quantify feature contributions. Table~\ref{tab:shap_top5} shows the top five features by mean |SHAP|, and Figure~\ref{fig:shap_hsho002} displays the dependence plot for \texttt{HSHO002}.
+
+\begin{table}[ht]
+  \centering
+  \caption{Top five features by mean |SHAP| (XGBoost)}
+  \begin{tabular}{llr}
+    \toprule
+    \textbf{Feature} & \textbf{Description}                       & $\mathbf{\overline{\lvert\text{SHAP}\rvert}}$ \\
+    \midrule
+    HSHO002  & Number of housekeepers employed            & 0.137 \\
+    HSSH042  & Mortgage on secondary residences           & 0.129 \\
+    HSMG001S & Total money gifts and contributions        & 0.125 \\
+    ECYMTNMED& Median maintainer age                     & 0.101 \\
+    HSCC002  & Childcare outside the home                 & 0.083 \\
+    \bottomrule
+  \end{tabular}
+  \label{tab:shap_top5}
+\end{table}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.75\linewidth]{figures/shap_dependence_hsho002.png}
+  \caption{SHAP dependence plot for \texttt{HSHO002}.}
+  \label{fig:shap_hsho002}
+\end{figure}
+
+For each of the top five features, key SHAP-based behaviors include:
+\begin{itemize}
+  \item \textbf{HSHO002}: Values below approximately two housekeepers drive strong positive contributions, while higher counts reverse to negative impacts, indicating threshold-like effects (Fig.~\ref{fig:shap_hsho002}).
+  \item \textbf{HSSH042}: Negative contributions intensify for large secondary mortgage values, consistent with heightened budget constraints under elevated debt loads.
+  \item \textbf{HSMG001S}: Small to moderate gift and contribution amounts yield positive effects, but marginal impact diminishes at higher values, suggesting diminishing returns.
+  \item \textbf{ECYMTNMED}: Consistently negative impact on predicted spending, with a sharper decline at extreme ages, highlighting accelerated non‑linear aging effects.
+  \item \textbf{HSCC002}: Low levels of childcare outside the home contribute positively and steeply, then plateau, reflecting interplay with total household support expenditures.
+\end{itemize}
+
+We used SHAP interaction values to detect pairwise effects, notably between \texttt{HSHO002} and \texttt{HSCC002}. Individual explanations showed how feature contributions sum to predictions. A summary dot plot (not shown) revealed variability for extreme \texttt{HSMG001S} values. However, correlated features can share attribution. Overall, SHAP provides reliable global and local insights for policy decisions.
+
+\subsection*{Conclusions and Recommendations}
+
+We predicted insurance and pension spending accurately with both methods. Elastic Net ($R^2=0.8040$) highlighted key macroeconomic and demographic drivers. XGBoost ($R^2\approx0.9114$) captured non-linear, threshold effects (e.g.\ housekeeper counts, gift contributions) that Elastic Net missed. SHAP confirmed these non-linear patterns and provided actionable global and local insights.
+
+\begin{itemize}
+  \item \textbf{Deploy the XGBoost model in production}, with routine monitoring of predictive performance and recalibration every quarter. Leverage early‑stopping and validation‑based retraining to guard against concept drift.
+  \item \textbf{Integrate SHAP‑driven alerts} into decision workflows. For example, flag households with extreme SHAP values on \texttt{HSHO002} or \texttt{HSMG001S} to target outreach or adjust product offerings.
+  \item \textbf{Segment the customer base} by key drivers uncovered (e.g.\ median maintainer age, household support expenditures). Tailor marketing and education campaigns—for younger households, emphasize pension benefits; for high secondary‑mortgage clients, highlight insurance products that mitigate debt risk.
+  \item \textbf{Expand data coverage} to include behavioral and psychographic variables (e.g.\ online engagement, risk tolerance surveys) to refine model granularity and support personalized recommendations.
+  \item \textbf{Establish a governance framework} for model explainability and fairness. Regularly audit feature importances and SHAP interactions to ensure no adverse or biased effects on underserved groups (e.g.\ unemployed or non‑working‑age segments).
+  \item \textbf{Conduct A/B tests} to quantify the lift from model‑driven interventions versus standard strategies, using metrics such as contribution rate uplift and retention.
+\end{itemize}
 
 \appendix
 \section*{Appendix}
